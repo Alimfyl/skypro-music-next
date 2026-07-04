@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Nav } from '@/components/Nav/Nav';
 import {Search} from '@/components/Search/Search';
+import { Filter } from '@/components/Filter/Filter';
 
 export default function Home() {
   return (
@@ -13,12 +14,7 @@ export default function Home() {
           <div className={'centerblock'}>
             <Search />
             <h2 className={'centerblock__h2'}>Треки</h2>
-            <div className={'centerblock__filter'}>
-              <div className={'filter__title'}>Искать по:</div>
-              <div className={'filter__button'}>исполнителю</div>
-              <div className={'filter__button'}>году выпуска</div>
-              <div className={'filter__button'}>жанру</div>
-            </div>
+            <Filter />
             <div className={'centerblock__content'}>
               <div className={'content__title'}>
                 <div className={'playlistTitle__col col01'}>Трек</div>
