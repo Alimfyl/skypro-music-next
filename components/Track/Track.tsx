@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import styles from './Track.module.scss';
+import styles from './Track.module.css';
 
 type TrackProps = {
     title: string;
