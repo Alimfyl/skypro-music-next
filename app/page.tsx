@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Nav } from '@/components/Nav/Nav';
 import {Search} from '@/components/Search/Search';
 import { Filter } from '@/components/Filter/Filter';
+import { Sidebar } from '@/components/Sidebar/Sidebar';
 
 export default function Home() {
   return (
@@ -198,53 +199,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className={'main__sidebar'}>
-            <div className={'sidebar__personal'}>
-              <p className={'sidebar__personalName'}>Sergey.Ivanov</p>
-              <div className={'sidebar__icon'}>
-                <svg>
-                  <use xlinkHref="/img/icon/sprite.svg#logout"></use>
-                </svg>
-              </div>
-            </div>
-            <div className={'sidebar__block'}>
-              <div className={'sidebar__list'}>
-                <div className={'sidebar__item'}>
-                  <Link className={'sidebar__link'} href="#">
-                    <Image
-                      className={'sidebar__img'}
-                      src="/img/playlist01.png"
-                      alt="day's playlist"
-                      width={250}
-                      height={170}
-                    />
-                  </Link>
-                </div>
-                <div className={'sidebar__item'}>
-                  <Link className={'sidebar__link'} href="#">
-                    <Image
-                      className={'sidebar__img'}
-                      src="/img/playlist02.png"
-                      alt="day's playlist"
-                      width={250}
-                      height={170}
-                    />
-                  </Link>
-                </div>
-                <div className={'sidebar__item'}>
-                  <Link className={'sidebar__link'} href="#">
-                    <Image
-                      className={'sidebar__img'}
-                      src="/img/playlist03.png"
-                      alt="day's playlist"
-                      width={250}
-                      height={170}
-                    />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Sidebar />
         </main>
         <div className={'bar'}>
           <div className={'bar__content'}>
