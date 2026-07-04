@@ -1,10 +1,12 @@
+import styles from './Filter.module.css';
+
 export function Filter() {
     return (
-        <div className={'centerblock__filter'}>
-              <div className={'filter__title'}>Искать по:</div>
-              <div className={'filter__button'}>исполнителю</div>
-              <div className={'filter__button'}>году выпуска</div>
-              <div className={'filter__button'}>жанру</div>
+        <div className={styles.centerblock__filter}>
+              <div className={styles.filter__title}>Искать по:</div>
+              <div className={styles.filter__button}>исполнителю</div>
+              <div className={styles.filter__button}>году выпуска</div>
+              <div className={styles.filter__button}>жанру</div>
             </div>
     )
 }
