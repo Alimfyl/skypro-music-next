@@ -2,6 +2,7 @@ import './page.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Nav } from '@/components/Nav/Nav';
+import {Search} from '@/components/Search/Search';
 
 export default function Home() {
   return (
@@ -10,17 +11,7 @@ export default function Home() {
         <main className={'main'}>
           <Nav />
           <div className={'centerblock'}>
-            <div className={'centerblock__search'}>
-              <svg className={'search__svg'}>
-                <use xlinkHref="/img/icon/sprite.svg#icon-search"></use>
-              </svg>
-              <input
-                className={'search__text'}
-                type="search"
-                placeholder="Поиск"
-                name="search"
-              />
-            </div>
+            <Search />
             <h2 className={'centerblock__h2'}>Треки</h2>
             <div className={'centerblock__filter'}>
               <div className={'filter__title'}>Искать по:</div>
