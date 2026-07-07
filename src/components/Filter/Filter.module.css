@@ -36,3 +36,7 @@
 .filter__button:not(:last-child) {
   margin-right: 10px;
 }
+.active {
+  border-color: #ad61ff;
+  color: #ad61ff;
+}
