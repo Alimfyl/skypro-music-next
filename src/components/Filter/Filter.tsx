@@ -5,18 +5,27 @@ import { useState } from 'react';
 import cn from 'classnames';
 import styles from './Filter.module.css';
 
-const filters = ['исполнителю', 'году выпуска', 'жанру'] as const;
+type FilterName = 'author' | 'year' | 'genre';
 
-type FilterName = (typeof filters)[number];
+type FilterItem = {
+  name: FilterName;
+  label: string;
+};
+
+const filters: FilterItem[] = [
+  { name: 'author', label: 'исполнителю' },
+  { name: 'year', label: 'году выпуска' },
+  { name: 'genre', label: 'жанру' },
+];
 
 const authors = [...new Set(tracks.map((track) => track.author))];
 const years = [...new Set(tracks.map((track) => track.releaseDate.toString()))];
 const genres = [...new Set(tracks.map((track) => track.genre))];
 
 const filterOptions: Record<FilterName, string[]> = {
-  исполнителю: authors,
-  'году выпуска': years,
-  жанру: genres,
+  author: authors,
+  year: years,
+  genre: genres,
 };
 
 export function Filter() {
@@ -35,21 +44,21 @@ export function Filter() {
     <div className={styles.centerblock__filter}>
       <div className={styles.filter__title}>Искать по:</div>
 
-      {filters.map((filterName) => (
-        <div key={filterName} className={styles.filter__item}>
+      {filters.map((filter) => (
+        <div key={filter.name} className={styles.filter__item}>
           <div
             className={cn(styles.filter__button, {
-              [styles.active]: activeFilter === filterName,
+              [styles.active]: activeFilter === filter.name,
             })}
-            onClick={() => handleFilterClick(filterName)}
+            onClick={() => handleFilterClick(filter.name)}
           >
-            {filterName}
+            {filter.label}
           </div>
 
-          {activeFilter === filterName && (
+          {activeFilter === filter.name && (
             <div className={styles.filter__popup}>
               <ul className={styles.filter__list}>
-                {filterOptions[filterName].map((option) => (
+                {filterOptions[filter.name].map((option) => (
                   <li key={option} className={styles.filter__listItem}>
                     {option}
                   </li>
