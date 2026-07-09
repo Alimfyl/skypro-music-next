@@ -37,12 +37,12 @@ export function Nav() {
             </li>
             <li className={styles.menu__item}>
               <Link href="#" className={styles.menu__link}>
-                Мой плейлист
+                Мои треки
               </Link>
             </li>
             <li className={styles.menu__item}>
               <Link href="/signin" className={styles.menu__link}>
-                Войти
+                Выйти
               </Link>
             </li>
           </ul>
