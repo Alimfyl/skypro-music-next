@@ -45,12 +45,12 @@ export function PlayerBar() {
                 </div>
                 <div className={styles.trackPlay__author}>
                   <Link className={styles.trackPlay__authorLink} href="#">
-                    РўС‹ С‚Р°...
+                    Ты та...
                   </Link>
                 </div>
                 <div className={styles.trackPlay__album}>
                   <Link className={styles.trackPlay__albumLink} href="#">
-                    Р‘Р°СЃС‚Р°
+                    Баста
                   </Link>
                 </div>
               </div>

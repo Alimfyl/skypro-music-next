@@ -14,7 +14,7 @@ export default function Home() {
           <Nav />
           <div className={styles.centerblock}>
             <Search />
-            <h2 className={styles.centerblock__h2}>РўСЂРµРєРё</h2>
+            <h2 className={styles.centerblock__h2}>Треки</h2>
             <Filter />
             <Playlist />
           </div>
