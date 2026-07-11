@@ -1,9 +1,10 @@
 .bar {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   background: rgba(28, 28, 28, 0.5);
+  z-index: 10;
 }
 
 .bar__content {
