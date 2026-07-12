@@ -17,14 +17,7 @@ export function Playlist() {
       </div>
       <div className={styles.content__playlist}>
         {tracks.map((track) => (
-          <Track
-            key={track.id}
-            title={track.title}
-            titleSpan={track.titleSpan}
-            author={track.author}
-            album={track.album}
-            time={track.time}
-          />
+          <Track key={track.id} track={track}/>
         ))}
       </div>
     </div>
