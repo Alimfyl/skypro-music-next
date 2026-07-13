@@ -162,18 +162,14 @@ export function PlayerBar() {
   };
 
   useEffect(() => {
-    if (!audioRef.current || !currentTrack) {
-      return;
-    }
+  if (!audioRef.current || !currentTrack) {
+    return;
+  }
 
+  if (audioRef.current.getAttribute('src') !== currentTrack.audioUrl) {
     audioRef.current.src = currentTrack.audioUrl;
-
-    if (isPlaying) {
-      audioRef.current.play().catch(() => {
-        dispatch(setIsPlaying(false));
-      });
-    }
-  }, [currentTrack, dispatch, isPlaying]);
+  }
+}, [currentTrack]);
 
   return (
     <div className={styles.bar}>
