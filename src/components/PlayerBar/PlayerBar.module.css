@@ -286,7 +286,7 @@
 
 .bar__playerProgressLine::-webkit-slider-runnable-track {
   height: 5px;
-  background: #2e2e2e;
+  background: transparent;
 }
 
 .bar__playerProgressLine::-webkit-slider-thumb {

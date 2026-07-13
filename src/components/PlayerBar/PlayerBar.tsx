@@ -196,6 +196,17 @@ export function PlayerBar() {
             value={currentTime}
             onChange={handleProgressChange}
             disabled={!currentTrack}
+            style={{
+              background: `linear-gradient(
+                to right,
+                rgba(182, 114, 255, 1) 0%,
+                rgba(182, 114, 255, 1) ${
+                  duration ? (currentTime / duration) * 100 : 0
+                }%,
+                #2e2e2e ${duration ? (currentTime / duration) * 100 : 0}%,
+                #2e2e2e 100%
+              )`,
+            }}
           />
           <span className={styles.bar__time}>
             {formatTime(currentTime)} / {formatTime(duration)}
