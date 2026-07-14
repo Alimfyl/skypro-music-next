@@ -4,11 +4,15 @@ import type { TrackType } from '@/data/tracks';
 type PlayerState = {
   currentTrack: TrackType | null;
   isPlaying: boolean;
+  isLooping: boolean;
+  isShuffle: boolean;
 };
 
 const initialState: PlayerState = {
   currentTrack: null,
   isPlaying: false,
+  isLooping: false,
+  isShuffle: false,
 };
 
 const playerSlice = createSlice({
@@ -25,10 +29,21 @@ const playerSlice = createSlice({
     togglePlaying: (state) => {
       state.isPlaying = !state.isPlaying;
     },
+    toggleLooping: (state) => {
+      state.isLooping = !state.isLooping;
+    },
+    toggleShuffle: (state) => {
+      state.isShuffle = !state.isShuffle;
+    },
   },
 });
 
-export const { setCurrentTrack, setIsPlaying, togglePlaying } =
-  playerSlice.actions;
+export const {
+  setCurrentTrack,
+  setIsPlaying,
+  togglePlaying,
+  toggleLooping,
+  toggleShuffle,
+} = playerSlice.actions;
 
 export const playerReducer = playerSlice.reducer;

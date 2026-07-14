@@ -271,3 +271,48 @@
   stroke: #ffffff;
   cursor: pointer;
 }
+.bar__playerProgress {
+  position: relative;
+}
+
+.bar__playerProgressLine {
+  width: 100%;
+  height: 5px;
+  appearance: none;
+  background: #2e2e2e;
+  cursor: pointer;
+  display: block;
+}
+
+.bar__playerProgressLine::-webkit-slider-runnable-track {
+  height: 5px;
+  background: transparent;
+}
+
+.bar__playerProgressLine::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #ad61ff;
+}
+
+.bar__playerProgressLine:disabled {
+  cursor: default;
+}
+
+.bar__time {
+  position: absolute;
+  right: 92px;
+  top: 12px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.btnIconActive svg {
+  stroke: #ad61ff;
+}
