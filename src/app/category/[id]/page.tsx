@@ -1,4 +1,4 @@
-import { getSelectionById } from '@/api/client';
+import { getAllTracks, getSelectionById } from '@/api/client';
 import { mapApiTracksToTracks } from '@/api/mappers';
 import { MainLayout } from '@/components/MainLayout/MainLayout';
 import type { TrackType } from '@/data/tracks';
@@ -17,10 +17,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   let message = '';
 
   try {
-    const selection = await getSelectionById(Number(id));
+    const [selection, apiTracks] = await Promise.all([
+      getSelectionById(Number(id)),
+      getAllTracks(),
+    ]);
 
-    title = selection.name;
-    tracks = mapApiTracksToTracks(selection.items);
+    if (!selection) {
+      throw new Error('Подборка не найдена');
+    }
+
+    title = selection.name || 'Подборка';
+
+    const selectionTrackIds = new Set(selection.items);
+    const selectionTracks = apiTracks.filter((track) =>
+      selectionTrackIds.has(track._id),
+    );
+
+    tracks = mapApiTracksToTracks(selectionTracks);
   } catch (error) {
     message =
       error instanceof Error ? error.message : 'Не удалось загрузить подборку';

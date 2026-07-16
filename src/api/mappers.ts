@@ -27,7 +27,7 @@ export function mapApiTrackToTrack(apiTrack: ApiTrack): TrackType {
     author: apiTrack.author,
     album: apiTrack.album,
     time: formatDuration(apiTrack.duration_in_seconds),
-    genre: apiTrack.genre,
+    genre: apiTrack.genre.join(', '),
     releaseDate: getReleaseYear(apiTrack.release_date),
     audioUrl: apiTrack.track_file,
   };

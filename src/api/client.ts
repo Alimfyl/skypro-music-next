@@ -1,5 +1,6 @@
 import type {
   ApiErrorResponse,
+  ApiResponse,
   ApiSelection,
   ApiTrack,
   LoginRequest,
@@ -58,14 +59,24 @@ export function getUserTokens(data: TokenRequest): Promise<TokenResponse> {
   });
 }
 
-export function getAllTracks(): Promise<ApiTrack[]> {
-  return request<ApiTrack[]>('/catalog/track/all/');
+export async function getAllTracks(): Promise<ApiTrack[]> {
+  const response = await request<ApiResponse<ApiTrack[]>>('/catalog/track/all/');
+
+  return response.data;
 }
 
-export function getAllSelections(): Promise<ApiSelection[]> {
-  return request<ApiSelection[]>('/catalog/selection/all');
+export async function getAllSelections(): Promise<ApiSelection[]> {
+  const response = await request<ApiResponse<ApiSelection[]>>(
+    '/catalog/selection/all',
+  );
+
+  return response.data;
 }
 
-export function getSelectionById(id: number): Promise<ApiSelection> {
-  return request<ApiSelection>(`/catalog/selection/${id}/`);
+export async function getSelectionById(id: number): Promise<ApiSelection | null> {
+  const response = await request<ApiResponse<ApiSelection | null>>(
+    `/catalog/selection/${id}/`,
+  );
+
+  return response.data;
 }
