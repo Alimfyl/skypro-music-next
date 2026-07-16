@@ -3,6 +3,7 @@ import type { TrackType } from '@/data/tracks';
 
 type PlayerState = {
   currentTrack: TrackType | null;
+  currentPlaylist: TrackType[];
   isPlaying: boolean;
   isLooping: boolean;
   isShuffle: boolean;
@@ -10,6 +11,7 @@ type PlayerState = {
 
 const initialState: PlayerState = {
   currentTrack: null,
+  currentPlaylist: [],
   isPlaying: false,
   isLooping: false,
   isShuffle: false,
@@ -22,6 +24,9 @@ const playerSlice = createSlice({
     setCurrentTrack: (state, action: PayloadAction<TrackType>) => {
       state.currentTrack = action.payload;
       state.isPlaying = true;
+    },
+    setCurrentPlaylist: (state, action: PayloadAction<TrackType[]>) => {
+      state.currentPlaylist = action.payload;
     },
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
@@ -40,6 +45,7 @@ const playerSlice = createSlice({
 
 export const {
   setCurrentTrack,
+  setCurrentPlaylist,
   setIsPlaying,
   togglePlaying,
   toggleLooping,
