@@ -1,8 +1,8 @@
 'use client';
 
-import { tracks } from '@/data/tracks';
 import { useState } from 'react';
 import cn from 'classnames';
+import type { TrackType } from '@/data/tracks';
 import styles from './Filter.module.css';
 
 type FilterName = 'author' | 'year' | 'genre';
@@ -12,24 +12,28 @@ type FilterItem = {
   label: string;
 };
 
+type FilterProps = {
+  tracks: TrackType[];
+};
+
 const filters: FilterItem[] = [
   { name: 'author', label: 'исполнителю' },
   { name: 'year', label: 'году выпуска' },
   { name: 'genre', label: 'жанру' },
 ];
 
-const authors = [...new Set(tracks.map((track) => track.author))];
-const years = [...new Set(tracks.map((track) => track.releaseDate.toString()))];
-const genres = [...new Set(tracks.map((track) => track.genre))];
+function getUniqueValues(values: string[]) {
+  return [...new Set(values)].filter(Boolean);
+}
 
-const filterOptions: Record<FilterName, string[]> = {
-  author: authors,
-  year: years,
-  genre: genres,
-};
-
-export function Filter() {
+export function Filter({ tracks }: FilterProps) {
   const [activeFilter, setActiveFilter] = useState<FilterName | null>(null);
+
+  const filterOptions: Record<FilterName, string[]> = {
+    author: getUniqueValues(tracks.map((track) => track.author)),
+    year: getUniqueValues(tracks.map((track) => track.releaseDate.toString())),
+    genre: getUniqueValues(tracks.map((track) => track.genre)),
+  };
 
   const handleFilterClick = (filterName: FilterName) => {
     if (activeFilter === filterName) {

@@ -29,7 +29,7 @@ export default async function Home() {
           <div className={styles.centerblock}>
             <Search />
             <h2 className={styles.centerblock__h2}>Треки</h2>
-            <Filter />
+            <Filter tracks={tracks} />
             {errorMessage ? (
               <p className={styles.message}>{errorMessage}</p>
             ) : (

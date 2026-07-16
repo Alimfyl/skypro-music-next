@@ -14,7 +14,7 @@ export default function Loading() {
           <div className={styles.centerblock}>
             <Search />
             <h2 className={styles.centerblock__h2}>Треки</h2>
-            <Filter />
+            <Filter tracks={[]} />
             <p className={styles.message}>Загрузка треков...</p>
           </div>
           <Sidebar />
