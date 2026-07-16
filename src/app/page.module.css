@@ -35,3 +35,8 @@
   letter-spacing: -0.8px;
   margin-bottom: 45px;
 }
+.message {
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 24px;
+}
