@@ -1,8 +1,12 @@
-import { tracks } from '@/data/tracks';
+import type { TrackType } from '@/data/tracks';
 import { Track } from '@/components/Track/Track';
 import styles from './Playlist.module.css';
 
-export function Playlist() {
+type PlaylistProps = {
+  tracks: TrackType[];
+};
+
+export function Playlist({ tracks }: PlaylistProps) {
   return (
     <div className={styles.centerblock__content}>
       <div className={styles.content__title}>

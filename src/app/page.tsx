@@ -4,6 +4,7 @@ import { Filter } from '@/components/Filter/Filter';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { PlayerBar } from '@/components/PlayerBar/PlayerBar';
 import { Playlist } from '@/components/Playlist/Playlist';
+import { tracks } from '@/data/tracks';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -16,7 +17,7 @@ export default function Home() {
             <Search />
             <h2 className={styles.centerblock__h2}>Треки</h2>
             <Filter />
-            <Playlist />
+            <Playlist tracks={tracks} />
           </div>
           <Sidebar />
         </main>
