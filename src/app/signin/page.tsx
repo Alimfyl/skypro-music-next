@@ -22,7 +22,7 @@ export default function SigninPage() {
     setIsLoading(true);
 
     try {
-      await loginUser({
+      const user = await loginUser({
         email,
         password,
       });
@@ -34,6 +34,7 @@ export default function SigninPage() {
 
       localStorage.setItem('accessToken', tokens.access);
       localStorage.setItem('refreshToken', tokens.refresh);
+      localStorage.setItem('userName', user.username);
 
       router.push('/');
     } catch (error) {
