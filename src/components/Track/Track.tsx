@@ -3,34 +3,40 @@
 import cn from 'classnames';
 import type { MouseEvent } from 'react';
 import Link from 'next/link';
-import { setCurrentTrack, setIsPlaying } from '@/store/features/playerSlice';
+import {
+  setCurrentPlaylist,
+  setCurrentTrack,
+  setIsPlaying,
+} from '@/store/features/playerSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { TrackType } from '@/data/tracks';
 import styles from './Track.module.css';
 
 type TrackProps = {
   track: TrackType;
+  playlist: TrackType[];
 };
 
-export function Track({ track }: TrackProps) {
+export function Track({ track, playlist }: TrackProps) {
   const dispatch = useAppDispatch();
   const { currentTrack, isPlaying } = useAppSelector((state) => state.player);
   const isCurrentTrack = currentTrack?.id === track.id;
 
   const handleTrackClick = (event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
+
     const audio = document.getElementById('player-audio') as HTMLAudioElement | null;
 
+    dispatch(setCurrentPlaylist(playlist));
+    dispatch(setCurrentTrack(track));
+
     if (!audio) {
-      dispatch(setCurrentTrack(track));
       return;
     }
 
     audio.src = track.audioUrl;
-    const playPromise = audio.play();
 
-    dispatch(setCurrentTrack(track));
-    playPromise.catch(() => {
+    audio.play().catch(() => {
       dispatch(setIsPlaying(false));
     });
   };
@@ -52,6 +58,7 @@ export function Track({ track }: TrackProps) {
               </svg>
             )}
           </div>
+
           <div className={styles.track__titleText}>
             <Link className={styles.track__titleLink} href="#">
               {track.title}
@@ -63,16 +70,19 @@ export function Track({ track }: TrackProps) {
             </Link>
           </div>
         </div>
+
         <div className={styles.track__author}>
           <Link className={styles.track__authorLink} href="#">
             {track.author}
           </Link>
         </div>
+
         <div className={styles.track__album}>
           <Link className={styles.track__albumLink} href="#">
             {track.album}
           </Link>
         </div>
+
         <div className={styles.track__time}>
           <svg className={styles.track__timeSvg}>
             <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>

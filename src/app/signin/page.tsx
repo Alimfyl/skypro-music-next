@@ -1,0 +1,90 @@
+'use client';
+
+import { FormEvent, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getUserTokens, loginUser } from '@/api/client';
+import styles from './Signin.module.css';
+
+export default function SigninPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorText, setErrorText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setErrorText('');
+    setIsLoading(true);
+
+    try {
+      const user = await loginUser({
+        email,
+        password,
+      });
+
+      const tokens = await getUserTokens({
+        email,
+        password,
+      });
+
+      localStorage.setItem('accessToken', tokens.access);
+      localStorage.setItem('refreshToken', tokens.refresh);
+      localStorage.setItem('userName', user.username);
+
+      router.push('/');
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorText(error.message);
+      } else {
+        setErrorText('Не удалось войти');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <main className={styles.page}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <Image
+          className={styles.logo}
+          src="/img/logo_modal.png"
+          alt="Skypro Music"
+          width={140}
+          height={21}
+        />
+
+        <input
+          className={styles.input}
+          type="email"
+          placeholder="Почта"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+
+        <input
+          className={styles.input}
+          type="password"
+          placeholder="Пароль"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+
+        {errorText && <p className={styles.error}>{errorText}</p>}
+
+        <button className={styles.primaryButton} type="submit" disabled={isLoading}>
+          {isLoading ? 'Вход...' : 'Войти'}
+        </button>
+
+        <Link className={styles.secondaryButton} href="/signup">
+          Зарегистрироваться
+        </Link>
+      </form>
+    </main>
+  );
+}

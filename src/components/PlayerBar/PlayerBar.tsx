@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { tracks, type TrackType } from '@/data/tracks';
+import type { TrackType } from '@/data/tracks';
 import {
   setCurrentTrack,
   setIsPlaying,
@@ -33,12 +33,16 @@ export function PlayerBar() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(100);
 
-  const { currentTrack, isPlaying, isLooping, isShuffle } = useAppSelector(
-    (state) => state.player,
-  );
+  const {
+    currentTrack,
+    currentPlaylist,
+    isPlaying,
+    isLooping,
+    isShuffle,
+  } = useAppSelector((state) => state.player);
 
   const currentTrackIndex = currentTrack
-    ? tracks.findIndex((track) => track.id === currentTrack.id)
+    ? currentPlaylist.findIndex((track) => track.id === currentTrack.id)
     : -1;
 
   const playTrack = (track: TrackType) => {
@@ -64,8 +68,12 @@ export function PlayerBar() {
 
   const getRandomTrack = () => {
     const availableTracks = currentTrack
-      ? tracks.filter((track) => track.id !== currentTrack.id)
-      : tracks;
+      ? currentPlaylist.filter((track) => track.id !== currentTrack.id)
+      : currentPlaylist;
+
+    if (availableTracks.length === 0) {
+      return null;
+    }
 
     const randomIndex = Math.floor(Math.random() * availableTracks.length);
 
@@ -74,11 +82,16 @@ export function PlayerBar() {
 
   const handleNextClick = () => {
     if (isShuffle) {
-      playTrack(getRandomTrack());
+      const randomTrack = getRandomTrack();
+
+      if (randomTrack) {
+        playTrack(randomTrack);
+      }
+
       return;
     }
 
-    const nextTrack = tracks[currentTrackIndex + 1];
+    const nextTrack = currentPlaylist[currentTrackIndex + 1];
 
     if (nextTrack) {
       playTrack(nextTrack);
@@ -86,7 +99,7 @@ export function PlayerBar() {
   };
 
   const handlePrevClick = () => {
-    const prevTrack = tracks[currentTrackIndex - 1];
+    const prevTrack = currentPlaylist[currentTrackIndex - 1];
 
     if (prevTrack) {
       playTrack(prevTrack);
@@ -125,11 +138,16 @@ export function PlayerBar() {
     }
 
     if (isShuffle) {
-      playTrack(getRandomTrack());
+      const randomTrack = getRandomTrack();
+
+      if (randomTrack) {
+        playTrack(randomTrack);
+      }
+
       return;
     }
 
-    const nextTrack = tracks[currentTrackIndex + 1];
+    const nextTrack = currentPlaylist[currentTrackIndex + 1];
 
     if (nextTrack) {
       playTrack(nextTrack);
@@ -162,14 +180,14 @@ export function PlayerBar() {
   };
 
   useEffect(() => {
-  if (!audioRef.current || !currentTrack) {
-    return;
-  }
+    if (!audioRef.current || !currentTrack) {
+      return;
+    }
 
-  if (audioRef.current.getAttribute('src') !== currentTrack.audioUrl) {
-    audioRef.current.src = currentTrack.audioUrl;
-  }
-}, [currentTrack]);
+    if (audioRef.current.getAttribute('src') !== currentTrack.audioUrl) {
+      audioRef.current.src = currentTrack.audioUrl;
+    }
+  }, [currentTrack]);
 
   return (
     <div className={styles.bar}>
