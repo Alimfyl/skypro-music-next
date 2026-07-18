@@ -5,6 +5,8 @@ import type {
   ApiTrack,
   LoginRequest,
   LoginResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
   TokenRequest,
@@ -28,6 +30,9 @@ async function request<T>(
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('401');
+    }
     const errorData = data as ApiErrorResponse;
 
     throw new Error(
@@ -36,6 +41,48 @@ async function request<T>(
   }
 
   return data as T;
+}
+
+async function requestWithAuth<T>(
+  path: string,
+  accessToken: string,
+  options?: RequestInit,
+): Promise<T> {
+  return request<T>(path, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+}
+
+export async function withReAuth<T>(
+  requestCallback: (accessToken: string) => Promise<T>,
+): Promise<T> {
+  const accessToken = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  if (!accessToken || !refreshToken) {
+    throw new Error('Необходимо войти в аккаунт');
+  }
+
+  try {
+    return await requestCallback(accessToken);
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== '401') {
+      throw error;
+    }
+
+    const refreshedTokens = await refreshAccessToken({
+      refresh: refreshToken,
+    });
+
+    localStorage.setItem('accessToken', refreshedTokens.access);
+    window.dispatchEvent(new Event('auth-change'));
+
+    return requestCallback(refreshedTokens.access);
+  }
 }
 
 export function signupUser(data: SignupRequest): Promise<SignupResponse> {
@@ -54,6 +101,15 @@ export function loginUser(data: LoginRequest): Promise<LoginResponse> {
 
 export function getUserTokens(data: TokenRequest): Promise<TokenResponse> {
   return request<TokenResponse>('/user/token/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function refreshAccessToken(
+  data: RefreshTokenRequest,
+): Promise<RefreshTokenResponse> {
+  return request<RefreshTokenResponse>('/user/token/refresh/', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -79,4 +135,43 @@ export async function getSelectionById(id: number): Promise<ApiSelection | null>
   );
 
   return response.data;
+}
+
+export function getFavoriteTracks(): Promise<ApiTrack[]> {
+  return withReAuth(async (accessToken) => {
+    const response = await requestWithAuth<ApiResponse<ApiTrack[]>>(
+      '/catalog/track/favorite/all/',
+      accessToken,
+    );
+
+    return response.data;
+  });
+}
+
+export function addTrackToFavorite(trackId: number): Promise<ApiTrack> {
+  return withReAuth(async (accessToken) => {
+    const response = await requestWithAuth<ApiResponse<ApiTrack>>(
+      `/catalog/track/${trackId}/favorite/`,
+      accessToken,
+      {
+        method: 'POST',
+      },
+    );
+
+    return response.data;
+  });
+}
+
+export function removeTrackFromFavorite(trackId: number): Promise<ApiTrack> {
+  return withReAuth(async (accessToken) => {
+    const response = await requestWithAuth<ApiResponse<ApiTrack>>(
+      `/catalog/track/${trackId}/favorite/`,
+      accessToken,
+      {
+        method: 'DELETE',
+      },
+    );
+
+    return response.data;
+  });
 }
