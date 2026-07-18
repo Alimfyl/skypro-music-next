@@ -30,6 +30,8 @@ export function mapApiTrackToTrack(apiTrack: ApiTrack): TrackType {
     genre: apiTrack.genre.join(', '),
     releaseDate: getReleaseYear(apiTrack.release_date),
     audioUrl: apiTrack.track_file,
+    likedUserIds: apiTrack.staredUser,
+    likesCount: apiTrack.staredUser.length,
   };
 }
 

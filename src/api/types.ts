@@ -33,6 +33,14 @@ export type TokenResponse = {
   refresh: string;
 };
 
+export type RefreshTokenRequest = {
+  refresh: string;
+};
+
+export type RefreshTokenResponse = {
+  access: string;
+};
+
 export type ApiResponse<T> = {
   success: boolean;
   data: T;
