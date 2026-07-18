@@ -35,6 +35,7 @@ export default function SigninPage() {
       localStorage.setItem('accessToken', tokens.access);
       localStorage.setItem('refreshToken', tokens.refresh);
       localStorage.setItem('userName', user.username);
+      localStorage.setItem('userId', user._id.toString());
 
       router.push('/');
     } catch (error) {
