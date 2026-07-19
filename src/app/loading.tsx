@@ -1,27 +1,11 @@
-import { Nav } from '@/components/Nav/Nav';
-import { Search } from '@/components/Search/Search';
-import { Filter } from '@/components/Filter/Filter';
-import { Sidebar } from '@/components/Sidebar/Sidebar';
-import { PlayerBar } from '@/components/PlayerBar/PlayerBar';
-import styles from './page.module.css';
+import { MainLayout } from '@/components/MainLayout/MainLayout';
 
 export default function Loading() {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.container}>
-        <main className={styles.main}>
-          <Nav />
-          <div className={styles.centerblock}>
-            <Search />
-            <h2 className={styles.centerblock__h2}>Треки</h2>
-            <Filter tracks={[]} />
-            <p className={styles.message}>Загрузка треков...</p>
-          </div>
-          <Sidebar />
-        </main>
-        <PlayerBar onTrackChange={() => {}} onError={() => {}} />
-        <footer></footer>
-      </div>
-    </div>
+    <MainLayout
+      title="Треки"
+      tracks={[]}
+      message="Загрузка треков..."
+    />
   );
 }
