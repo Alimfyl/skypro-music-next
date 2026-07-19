@@ -77,8 +77,13 @@ export function Track({
       const apiTrack = isLiked
         ? await removeTrackFromFavorite(track.id)
         : await addTrackToFavorite(track.id);
+      const updatedTrack = mapApiTrackToTrack(apiTrack);
 
-      onTrackChange(mapApiTrackToTrack(apiTrack));
+      if (isCurrentTrack) {
+        dispatch(setCurrentTrack(updatedTrack));
+      }
+
+      onTrackChange(updatedTrack);
     } catch (error) {
       onError(
         error instanceof Error

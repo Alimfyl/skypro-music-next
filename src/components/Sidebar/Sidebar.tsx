@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import styles from './Sidebar.module.css';
 
 function subscribeToAuth(callback: () => void) {
@@ -26,6 +26,7 @@ function getServerSnapshot() {
 
 export function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const userName = useSyncExternalStore(
     subscribeToAuth,
@@ -40,7 +41,7 @@ export function Sidebar() {
     localStorage.removeItem('userId');
 
     window.dispatchEvent(new Event('auth-change'));
-    router.push('/signin');
+    router.push(pathname === '/favorites' ? '/' : '/signin');
   };
 
   return (

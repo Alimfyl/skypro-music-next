@@ -10,6 +10,14 @@ import { Playlist } from '@/components/Playlist/Playlist';
 import type { TrackType } from '@/data/tracks';
 import styles from './MainLayout.module.css';
 
+function getCurrentUserId() {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+
+  return Number(localStorage.getItem('userId'));
+}
+
 type MainLayoutProps = {
   title: string;
   tracks: TrackType[];
@@ -29,7 +37,10 @@ export function MainLayout({
   const handleTrackChange = useCallback(
     (updatedTrack: TrackType) => {
       setCurrentTracks((prevTracks) => {
-        if (isFavoritesPage && updatedTrack.likesCount === 0) {
+        const userId = getCurrentUserId();
+        const isLikedByCurrentUser = updatedTrack.likedUserIds.includes(userId);
+
+        if (isFavoritesPage && !isLikedByCurrentUser) {
           return prevTracks.filter((track) => track.id !== updatedTrack.id);
         }
 
