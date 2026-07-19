@@ -1,13 +1,12 @@
 'use client';
 
 import cn from 'classnames';
+import { ChangeEvent, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import {
   addTrackToFavorite,
   removeTrackFromFavorite,
 } from '@/api/client';
-import { mapApiTrackToTrack } from '@/api/mappers';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import type { TrackType } from '@/data/tracks';
 import {
   setCurrentTrack,
@@ -17,6 +16,11 @@ import {
 } from '@/store/features/playerSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import styles from './PlayerBar.module.css';
+
+type PlayerBarProps = {
+  onTrackChange: (track: TrackType) => void;
+  onError: (message: string) => void;
+};
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) {
@@ -31,17 +35,22 @@ function formatTime(seconds: number) {
   return `${minutes}:${secondsLeft}`;
 }
 
-type PlayerBarProps = {
-  onTrackChange: (track: TrackType) => void;
-  onError: (message: string) => void;
-};
+function subscribeToAuth(callback: () => void) {
+  window.addEventListener('storage', callback);
+  window.addEventListener('auth-change', callback);
 
-function getCurrentUserId() {
-  if (typeof window === 'undefined') {
-    return 0;
-  }
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('auth-change', callback);
+  };
+}
 
-  return Number(localStorage.getItem('userId'));
+function getUserIdSnapshot() {
+  return localStorage.getItem('userId') || '';
+}
+
+function getServerUserIdSnapshot() {
+  return '';
 }
 
 export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
@@ -51,6 +60,13 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(100);
+
+  const userId = useSyncExternalStore(
+    subscribeToAuth,
+    getUserIdSnapshot,
+    getServerUserIdSnapshot,
+  );
+  const numericUserId = Number(userId);
 
   const {
     currentTrack,
@@ -63,10 +79,8 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
   const currentTrackIndex = currentTrack
     ? currentPlaylist.findIndex((track) => track.id === currentTrack.id)
     : -1;
-
-    const userId = getCurrentUserId();
-    const isCurrentTrackLiked = currentTrack
-    ? currentTrack.likedUserIds.includes(userId)
+  const isCurrentTrackLiked = currentTrack && userId
+    ? currentTrack.likedUserIds.includes(numericUserId)
     : false;
 
   const playTrack = (track: TrackType) => {
@@ -203,31 +217,52 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
     }
   };
 
-  const handleLikeClick = async () => {
-  if (!currentTrack) {
-    return;
-  }
+  const updateCurrentTrackLike = async (shouldLike: boolean) => {
+    if (!currentTrack) {
+      return;
+    }
 
-  if (!localStorage.getItem('accessToken')) {
-    onError('Чтобы поставить лайк, нужно войти в аккаунт');
-    return;
-  }
+    if (!localStorage.getItem('accessToken') || !userId) {
+      onError('Чтобы поставить лайк, нужно войти в аккаунт');
+      return;
+    }
 
-  try {
-    const apiTrack = isCurrentTrackLiked
-      ? await removeTrackFromFavorite(currentTrack.id)
-      : await addTrackToFavorite(currentTrack.id);
+    try {
+      if (shouldLike) {
+        await addTrackToFavorite(currentTrack.id);
+      } else {
+        await removeTrackFromFavorite(currentTrack.id);
+      }
 
-    const updatedTrack = mapApiTrackToTrack(apiTrack);
+      const likedUserIds = shouldLike
+        ? Array.from(new Set([...currentTrack.likedUserIds, numericUserId]))
+        : currentTrack.likedUserIds.filter(
+          (likedUserId) => likedUserId !== numericUserId,
+        );
+      const updatedTrack = {
+        ...currentTrack,
+        likedUserIds,
+        likesCount: likedUserIds.length,
+      };
 
-    dispatch(setCurrentTrack(updatedTrack));
-    onTrackChange(updatedTrack);
-  } catch (error) {
-    onError(
-      error instanceof Error ? error.message : 'Не удалось обновить лайк',
-    );
-  }
-};
+      dispatch(setCurrentTrack(updatedTrack));
+      onTrackChange(updatedTrack);
+    } catch (error) {
+      onError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось обновить лайк',
+      );
+    }
+  };
+
+  const handleLikeClick = () => {
+    void updateCurrentTrackLike(!isCurrentTrackLiked);
+  };
+
+  const handleDislikeClick = () => {
+    void updateCurrentTrackLike(false);
+  };
 
   useEffect(() => {
     if (!audioRef.current || !currentTrack) {
@@ -369,11 +404,15 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
                     <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
                   </svg>
                 </button>
-                <div className={`${styles.trackPlay__dislike} ${styles.btnIcon}`}>
+                <button
+                  className={`${styles.trackPlay__dislike} ${styles.btnIcon}`}
+                  type="button"
+                  onClick={handleDislikeClick}
+                >
                   <svg className={styles.trackPlay__dislikeSvg}>
                     <use xlinkHref="/img/icon/sprite.svg#icon-dislike"></use>
                   </svg>
-                </div>
+                </button>
               </div>
             </div>
           </div>

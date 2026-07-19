@@ -40,8 +40,11 @@ export function Sidebar() {
     localStorage.removeItem('userName');
     localStorage.removeItem('userId');
 
-    window.dispatchEvent(new Event('auth-change'));
-    router.push(pathname === '/favorites' ? '/' : '/signin');
+    if (pathname !== '/favorites') {
+      window.dispatchEvent(new Event('auth-change'));
+    }
+
+    router.replace('/');
   };
 
   return (

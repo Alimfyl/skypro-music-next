@@ -1,13 +1,12 @@
 'use client';
 
 import cn from 'classnames';
-import type { MouseEvent } from 'react';
+import { useSyncExternalStore, type MouseEvent } from 'react';
 import Link from 'next/link';
 import {
   addTrackToFavorite,
   removeTrackFromFavorite,
 } from '@/api/client';
-import { mapApiTrackToTrack } from '@/api/mappers';
 import {
   setCurrentPlaylist,
   setCurrentTrack,
@@ -24,12 +23,22 @@ type TrackProps = {
   onError: (message: string) => void;
 };
 
-function getCurrentUserId() {
-  if (typeof window === 'undefined') {
-    return 0;
-  }
+function subscribeToAuth(callback: () => void) {
+  window.addEventListener('storage', callback);
+  window.addEventListener('auth-change', callback);
 
-  return Number(localStorage.getItem('userId'));
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('auth-change', callback);
+  };
+}
+
+function getUserIdSnapshot() {
+  return localStorage.getItem('userId') || '';
+}
+
+function getServerUserIdSnapshot() {
+  return '';
 }
 
 export function Track({
@@ -42,8 +51,14 @@ export function Track({
   const { currentTrack, isPlaying } = useAppSelector((state) => state.player);
   const isCurrentTrack = currentTrack?.id === track.id;
 
-  const userId = getCurrentUserId();
-  const isLiked = track.likedUserIds.includes(userId);
+  const userId = useSyncExternalStore(
+    subscribeToAuth,
+    getUserIdSnapshot,
+    getServerUserIdSnapshot,
+  );
+  const isLiked = userId
+    ? track.likedUserIds.includes(Number(userId))
+    : false;
 
   const handleTrackClick = (event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -74,10 +89,21 @@ export function Track({
     }
 
     try {
-      const apiTrack = isLiked
-        ? await removeTrackFromFavorite(track.id)
-        : await addTrackToFavorite(track.id);
-      const updatedTrack = mapApiTrackToTrack(apiTrack);
+      if (isLiked) {
+        await removeTrackFromFavorite(track.id);
+      } else {
+        await addTrackToFavorite(track.id);
+      }
+
+      const currentUserId = Number(userId);
+      const likedUserIds = isLiked
+        ? track.likedUserIds.filter((likedUserId) => likedUserId !== currentUserId)
+        : [...track.likedUserIds, currentUserId];
+      const updatedTrack = {
+        ...track,
+        likedUserIds,
+        likesCount: likedUserIds.length,
+      };
 
       if (isCurrentTrack) {
         dispatch(setCurrentTrack(updatedTrack));

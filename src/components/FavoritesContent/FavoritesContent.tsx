@@ -17,12 +17,12 @@ function subscribeToAuth(callback: () => void) {
   };
 }
 
-function getAccessTokenSnapshot() {
+function getAccessTokenSnapshot(): string | null {
   return localStorage.getItem('accessToken') || '';
 }
 
-function getServerSnapshot() {
-  return '';
+function getServerSnapshot(): string | null {
+  return null;
 }
 
 export function FavoritesContent() {
@@ -41,8 +41,12 @@ export function FavoritesContent() {
     let isActual = true;
 
     async function loadFavoriteTracks() {
+      if (accessToken === null) {
+        return;
+      }
+
       if (!accessToken) {
-        router.push('/signin');
+        router.replace('/signin');
         return;
       }
 
@@ -78,8 +82,11 @@ export function FavoritesContent() {
     };
   }, [accessToken, router]);
 
+  const layoutKey = `${message}-${tracks.map((track) => track.id).join('-')}`;
+
   return (
     <MainLayout
+      key={layoutKey}
       title="Мои треки"
       tracks={tracks}
       message={message}
