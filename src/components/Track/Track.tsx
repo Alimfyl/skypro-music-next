@@ -4,6 +4,11 @@ import cn from 'classnames';
 import type { MouseEvent } from 'react';
 import Link from 'next/link';
 import {
+  addTrackToFavorite,
+  removeTrackFromFavorite,
+} from '@/api/client';
+import { mapApiTrackToTrack } from '@/api/mappers';
+import {
   setCurrentPlaylist,
   setCurrentTrack,
   setIsPlaying,
@@ -15,12 +20,22 @@ import styles from './Track.module.css';
 type TrackProps = {
   track: TrackType;
   playlist: TrackType[];
+  onTrackChange: (track: TrackType) => void;
+  onError: (message: string) => void;
 };
 
-export function Track({ track, playlist }: TrackProps) {
+export function Track({
+  track,
+  playlist,
+  onTrackChange,
+  onError,
+}: TrackProps) {
   const dispatch = useAppDispatch();
   const { currentTrack, isPlaying } = useAppSelector((state) => state.player);
   const isCurrentTrack = currentTrack?.id === track.id;
+
+  const userId = Number(localStorage.getItem('userId'));
+  const isLiked = track.likedUserIds.includes(userId);
 
   const handleTrackClick = (event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -39,6 +54,30 @@ export function Track({ track, playlist }: TrackProps) {
     audio.play().catch(() => {
       dispatch(setIsPlaying(false));
     });
+  };
+
+  const handleLikeClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (!localStorage.getItem('accessToken')) {
+      onError('Чтобы поставить лайк, нужно войти в аккаунт');
+      return;
+    }
+
+    try {
+      const apiTrack = isLiked
+        ? await removeTrackFromFavorite(track.id)
+        : await addTrackToFavorite(track.id);
+
+      onTrackChange(mapApiTrackToTrack(apiTrack));
+    } catch (error) {
+      onError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось обновить лайк',
+      );
+    }
   };
 
   return (
@@ -84,9 +123,18 @@ export function Track({ track, playlist }: TrackProps) {
         </div>
 
         <div className={styles.track__time}>
-          <svg className={styles.track__timeSvg}>
-            <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
-          </svg>
+          <button
+            className={cn(styles.track__likeButton, {
+              [styles.track__likeButton_active]: isLiked,
+            })}
+            type="button"
+            onClick={handleLikeClick}
+          >
+            <svg className={styles.track__timeSvg}>
+              <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
+            </svg>
+          </button>
+          <span className={styles.track__likesCount}>{track.likesCount}</span>
           <span className={styles.track__timeText}>{track.time}</span>
         </div>
       </div>

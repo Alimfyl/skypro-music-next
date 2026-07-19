@@ -149,3 +149,27 @@
     opacity: 0.7;
   }
 }
+.track__time {
+  display: flex;
+  align-items: center;
+}
+
+.track__likeButton {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.track__likeButton_active .track__timeSvg {
+  fill: #ad61ff;
+  stroke: #ad61ff;
+  transform: scale(1.12);
+}
+
+.track__likesCount {
+  margin-right: 12px;
+  color: #696969;
+  font-size: 14px;
+  line-height: 20px;
+}
