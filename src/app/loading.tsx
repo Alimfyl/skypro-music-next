@@ -19,7 +19,7 @@ export default function Loading() {
           </div>
           <Sidebar />
         </main>
-        <PlayerBar />
+        <PlayerBar onTrackChange={() => {}} onError={() => {}} />
         <footer></footer>
       </div>
     </div>

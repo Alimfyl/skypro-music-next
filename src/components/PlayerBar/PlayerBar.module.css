@@ -176,6 +176,8 @@
 
 .trackPlay__like,
 .trackPlay__dislike {
+  border: none;
+  background-color:  transparent;
   padding: 5px;
 }
 

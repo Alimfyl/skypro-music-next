@@ -67,7 +67,7 @@ export function MainLayout({
           </div>
           <Sidebar />
         </main>
-        <PlayerBar />
+        <PlayerBar onTrackChange={handleTrackChange} onError={handleError} />
         <footer></footer>
       </div>
     </div>

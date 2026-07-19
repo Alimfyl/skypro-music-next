@@ -1,5 +1,11 @@
 'use client';
 
+import cn from 'classnames';
+import {
+  addTrackToFavorite,
+  removeTrackFromFavorite,
+} from '@/api/client';
+import { mapApiTrackToTrack } from '@/api/mappers';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { TrackType } from '@/data/tracks';
@@ -25,7 +31,20 @@ function formatTime(seconds: number) {
   return `${minutes}:${secondsLeft}`;
 }
 
-export function PlayerBar() {
+type PlayerBarProps = {
+  onTrackChange: (track: TrackType) => void;
+  onError: (message: string) => void;
+};
+
+function getCurrentUserId() {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+
+  return Number(localStorage.getItem('userId'));
+}
+
+export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const dispatch = useAppDispatch();
 
@@ -44,6 +63,11 @@ export function PlayerBar() {
   const currentTrackIndex = currentTrack
     ? currentPlaylist.findIndex((track) => track.id === currentTrack.id)
     : -1;
+
+    const userId = getCurrentUserId();
+    const isCurrentTrackLiked = currentTrack
+    ? currentTrack.likedUserIds.includes(userId)
+    : false;
 
   const playTrack = (track: TrackType) => {
     if (!audioRef.current) {
@@ -179,6 +203,32 @@ export function PlayerBar() {
     }
   };
 
+  const handleLikeClick = async () => {
+  if (!currentTrack) {
+    return;
+  }
+
+  if (!localStorage.getItem('accessToken')) {
+    onError('Чтобы поставить лайк, нужно войти в аккаунт');
+    return;
+  }
+
+  try {
+    const apiTrack = isCurrentTrackLiked
+      ? await removeTrackFromFavorite(currentTrack.id)
+      : await addTrackToFavorite(currentTrack.id);
+
+    const updatedTrack = mapApiTrackToTrack(apiTrack);
+
+    dispatch(setCurrentTrack(updatedTrack));
+    onTrackChange(updatedTrack);
+  } catch (error) {
+    onError(
+      error instanceof Error ? error.message : 'Не удалось обновить лайк',
+    );
+  }
+};
+
   useEffect(() => {
     if (!audioRef.current || !currentTrack) {
       return;
@@ -308,12 +358,17 @@ export function PlayerBar() {
               </div>
 
               <div className={styles.trackPlay__likeDis}>
-                <div className={`${styles.trackPlay__like} ${styles.btnIcon}`}>
+                <button
+                  className={cn(styles.trackPlay__like, styles.btnIcon, {
+                    [styles.btnIconActive]: isCurrentTrackLiked,
+                  })}
+                  type="button"
+                  onClick={handleLikeClick}
+                >
                   <svg className={styles.trackPlay__likeSvg}>
                     <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
                   </svg>
-                </div>
-
+                </button>
                 <div className={`${styles.trackPlay__dislike} ${styles.btnIcon}`}>
                   <svg className={styles.trackPlay__dislikeSvg}>
                     <use xlinkHref="/img/icon/sprite.svg#icon-dislike"></use>
