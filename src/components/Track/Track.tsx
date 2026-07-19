@@ -24,6 +24,14 @@ type TrackProps = {
   onError: (message: string) => void;
 };
 
+function getCurrentUserId() {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+
+  return Number(localStorage.getItem('userId'));
+}
+
 export function Track({
   track,
   playlist,
@@ -34,7 +42,7 @@ export function Track({
   const { currentTrack, isPlaying } = useAppSelector((state) => state.player);
   const isCurrentTrack = currentTrack?.id === track.id;
 
-  const userId = Number(localStorage.getItem('userId'));
+  const userId = getCurrentUserId();
   const isLiked = track.likedUserIds.includes(userId);
 
   const handleTrackClick = (event: MouseEvent<HTMLDivElement>) => {
