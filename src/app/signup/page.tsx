@@ -56,6 +56,7 @@ export default function SignupPage() {
           className={styles.input}
           type="text"
           placeholder="Имя пользователя"
+          autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
         />
@@ -64,6 +65,7 @@ export default function SignupPage() {
           className={styles.input}
           type="email"
           placeholder="Почта"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
@@ -72,6 +74,7 @@ export default function SignupPage() {
           className={styles.input}
           type="password"
           placeholder="Пароль"
+          autoComplete="new-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />

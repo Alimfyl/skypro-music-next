@@ -40,7 +40,11 @@ export default function SigninPage() {
       router.push('/');
     } catch (error) {
       if (error instanceof Error) {
-        setErrorText(error.message);
+        setErrorText(
+          error.message === '401'
+            ? 'Неверная почта или пароль'
+            : error.message,
+        );
       } else {
         setErrorText('Не удалось войти');
       }
@@ -64,6 +68,7 @@ export default function SigninPage() {
           className={styles.input}
           type="email"
           placeholder="Почта"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
@@ -72,6 +77,7 @@ export default function SigninPage() {
           className={styles.input}
           type="password"
           placeholder="Пароль"
+          autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
