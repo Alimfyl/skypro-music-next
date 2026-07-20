@@ -1,7 +1,12 @@
 'use client';
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import cn from 'classnames';
+import { ChangeEvent, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import {
+  addTrackToFavorite,
+  removeTrackFromFavorite,
+} from '@/api/client';
 import type { TrackType } from '@/data/tracks';
 import {
   setCurrentTrack,
@@ -11,6 +16,11 @@ import {
 } from '@/store/features/playerSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import styles from './PlayerBar.module.css';
+
+type PlayerBarProps = {
+  onTrackChange: (track: TrackType) => void;
+  onError: (message: string) => void;
+};
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) {
@@ -25,13 +35,38 @@ function formatTime(seconds: number) {
   return `${minutes}:${secondsLeft}`;
 }
 
-export function PlayerBar() {
+function subscribeToAuth(callback: () => void) {
+  window.addEventListener('storage', callback);
+  window.addEventListener('auth-change', callback);
+
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('auth-change', callback);
+  };
+}
+
+function getUserIdSnapshot() {
+  return localStorage.getItem('userId') || '';
+}
+
+function getServerUserIdSnapshot() {
+  return '';
+}
+
+export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const dispatch = useAppDispatch();
 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(100);
+
+  const userId = useSyncExternalStore(
+    subscribeToAuth,
+    getUserIdSnapshot,
+    getServerUserIdSnapshot,
+  );
+  const numericUserId = Number(userId);
 
   const {
     currentTrack,
@@ -44,6 +79,9 @@ export function PlayerBar() {
   const currentTrackIndex = currentTrack
     ? currentPlaylist.findIndex((track) => track.id === currentTrack.id)
     : -1;
+  const isCurrentTrackLiked = currentTrack && userId
+    ? currentTrack.likedUserIds.includes(numericUserId)
+    : false;
 
   const playTrack = (track: TrackType) => {
     if (!audioRef.current) {
@@ -179,6 +217,53 @@ export function PlayerBar() {
     }
   };
 
+  const updateCurrentTrackLike = async (shouldLike: boolean) => {
+    if (!currentTrack) {
+      return;
+    }
+
+    if (!localStorage.getItem('accessToken') || !userId) {
+      onError('Чтобы поставить лайк, нужно войти в аккаунт');
+      return;
+    }
+
+    try {
+      if (shouldLike) {
+        await addTrackToFavorite(currentTrack.id);
+      } else {
+        await removeTrackFromFavorite(currentTrack.id);
+      }
+
+      const likedUserIds = shouldLike
+        ? Array.from(new Set([...currentTrack.likedUserIds, numericUserId]))
+        : currentTrack.likedUserIds.filter(
+          (likedUserId) => likedUserId !== numericUserId,
+        );
+      const updatedTrack = {
+        ...currentTrack,
+        likedUserIds,
+        likesCount: likedUserIds.length,
+      };
+
+      dispatch(setCurrentTrack(updatedTrack));
+      onTrackChange(updatedTrack);
+    } catch (error) {
+      onError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось обновить лайк',
+      );
+    }
+  };
+
+  const handleLikeClick = () => {
+    void updateCurrentTrackLike(!isCurrentTrackLiked);
+  };
+
+  const handleDislikeClick = () => {
+    void updateCurrentTrackLike(false);
+  };
+
   useEffect(() => {
     if (!audioRef.current || !currentTrack) {
       return;
@@ -308,17 +393,26 @@ export function PlayerBar() {
               </div>
 
               <div className={styles.trackPlay__likeDis}>
-                <div className={`${styles.trackPlay__like} ${styles.btnIcon}`}>
+                <button
+                  className={cn(styles.trackPlay__like, styles.btnIcon, {
+                    [styles.btnIconActive]: isCurrentTrackLiked,
+                  })}
+                  type="button"
+                  onClick={handleLikeClick}
+                >
                   <svg className={styles.trackPlay__likeSvg}>
                     <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
                   </svg>
-                </div>
-
-                <div className={`${styles.trackPlay__dislike} ${styles.btnIcon}`}>
+                </button>
+                <button
+                  className={`${styles.trackPlay__dislike} ${styles.btnIcon}`}
+                  type="button"
+                  onClick={handleDislikeClick}
+                >
                   <svg className={styles.trackPlay__dislikeSvg}>
                     <use xlinkHref="/img/icon/sprite.svg#icon-dislike"></use>
                   </svg>
-                </div>
+                </button>
               </div>
             </div>
           </div>

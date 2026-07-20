@@ -4,9 +4,11 @@ import styles from './Playlist.module.css';
 
 type PlaylistProps = {
   tracks: TrackType[];
+  onTrackChange: (track: TrackType) => void;
+  onError: (message: string) => void;
 };
 
-export function Playlist({ tracks }: PlaylistProps) {
+export function Playlist({ tracks, onTrackChange, onError }: PlaylistProps) {
   return (
     <div className={styles.centerblock__content}>
       <div className={styles.content__title}>
@@ -28,7 +30,13 @@ export function Playlist({ tracks }: PlaylistProps) {
 
       <div className={styles.content__playlist}>
         {tracks.map((track) => (
-          <Track key={track.id} track={track} playlist={tracks} />
+          <Track
+            key={track.id}
+            track={track}
+            playlist={tracks}
+            onTrackChange={onTrackChange}
+            onError={onError}
+          />
         ))}
       </div>
     </div>

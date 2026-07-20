@@ -1,6 +1,7 @@
 
 .main__sidebar {
-  max-width: 418px;
+  width: 418px;
+  flex-shrink: 0;
   padding: 20px 90px 20px 78px;
 }
 .sidebar__personal {

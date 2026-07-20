@@ -3,7 +3,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import styles from './Nav.module.css';
 
 function subscribeToAuth(callback: () => void) {
@@ -26,6 +26,7 @@ function getServerSnapshot() {
 
 export function Nav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
 
   const accessToken = useSyncExternalStore(
@@ -40,9 +41,13 @@ export function Nav() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userName');
+    localStorage.removeItem('userId');
 
-    window.dispatchEvent(new Event('auth-change'));
-    router.push('/signin');
+    if (pathname !== '/favorites') {
+      window.dispatchEvent(new Event('auth-change'));
+    }
+
+    router.replace('/');
   };
 
   return (
@@ -76,7 +81,7 @@ export function Nav() {
             </li>
 
             <li className={styles.menu__item}>
-              <Link href="#" className={styles.menu__link}>
+              <Link href="/favorites" className={styles.menu__link}>
                 Мой плейлист
               </Link>
             </li>
