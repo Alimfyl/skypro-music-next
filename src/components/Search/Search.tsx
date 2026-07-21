@@ -1,6 +1,11 @@
 import styles from './Search.module.css';
 
-export function Search() {
+type SearchProps = {
+  searchQuery: string;
+  onSearchChange: (searchQuery: string) => void;
+};
+
+export function Search({ searchQuery, onSearchChange }: SearchProps) {
   return (
     <div className={styles.centerblock__search}>
       <svg className={styles.search__svg}>
@@ -11,6 +16,8 @@ export function Search() {
         type="search"
         placeholder="Поиск"
         name="search"
+        value={searchQuery}
+        onChange={(event) => onSearchChange(event.target.value)}
       />
     </div>
   );
