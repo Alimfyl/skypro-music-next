@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Nav } from '@/components/Nav/Nav';
 import { Search } from '@/components/Search/Search';
 import { Filter } from '@/components/Filter/Filter';
@@ -8,6 +8,11 @@ import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { PlayerBar } from '@/components/PlayerBar/PlayerBar';
 import { Playlist } from '@/components/Playlist/Playlist';
 import type { TrackType } from '@/data/tracks';
+import {
+  defaultTrackFilters,
+  getFilteredTracks,
+  type TrackFilters,
+} from '@/utils/trackFilters';
 import styles from './MainLayout.module.css';
 
 function getCurrentUserId() {
@@ -32,7 +37,17 @@ export function MainLayout({
   isFavoritesPage = false,
 }: MainLayoutProps) {
   const [currentTracks, setCurrentTracks] = useState(tracks);
+  const [filters, setFilters] = useState<TrackFilters>(defaultTrackFilters);
   const [errorText, setErrorText] = useState('');
+
+  const filteredTracks = useMemo(
+    () => getFilteredTracks(currentTracks, filters),
+    [currentTracks, filters],
+  );
+
+  const handleFiltersChange = useCallback((nextFilters: TrackFilters) => {
+    setFilters(nextFilters);
+  }, []);
 
   const handleTrackChange = useCallback(
     (updatedTrack: TrackType) => {
@@ -57,6 +72,7 @@ export function MainLayout({
   }, []);
 
   const shownMessage = message || errorText;
+  const isTracksNotFound = !shownMessage && filteredTracks.length === 0;
 
   return (
     <div className={styles.wrapper}>
@@ -64,13 +80,28 @@ export function MainLayout({
         <main className={styles.main}>
           <Nav />
           <div className={styles.centerblock}>
-            <Search />
+            <Search
+              searchQuery={filters.searchQuery}
+              onSearchChange={(searchQuery) =>
+                handleFiltersChange({
+                  ...filters,
+                  searchQuery,
+                })
+              }
+            />
             <h2 className={styles.centerblock__h2}>{title}</h2>
-            <Filter tracks={currentTracks} />
+            <Filter
+              tracks={currentTracks}
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
             {shownMessage && <p className={styles.message}>{shownMessage}</p>}
-            {!message && (
+            {isTracksNotFound && (
+              <p className={styles.message}>Нет подходящих треков</p>
+            )}
+            {!message && !isTracksNotFound && (
               <Playlist
-                tracks={currentTracks}
+                tracks={filteredTracks}
                 onTrackChange={handleTrackChange}
                 onError={handleError}
               />
