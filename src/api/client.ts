@@ -12,6 +12,12 @@ import type {
   TokenRequest,
   TokenResponse,
 } from './types';
+import {
+  getAccessToken,
+  getRefreshToken,
+  notifyAuthChange,
+  setAccessToken,
+} from '@/utils/authStorage';
 
 const API_URL = 'https://webdev-music-003b5b991590.herokuapp.com';
 
@@ -60,8 +66,8 @@ async function requestWithAuth<T>(
 export async function withReAuth<T>(
   requestCallback: (accessToken: string) => Promise<T>,
 ): Promise<T> {
-  const accessToken = localStorage.getItem('accessToken');
-  const refreshToken = localStorage.getItem('refreshToken');
+  const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
 
   if (!accessToken || !refreshToken) {
     throw new Error('Необходимо войти в аккаунт');
@@ -78,8 +84,8 @@ export async function withReAuth<T>(
       refresh: refreshToken,
     });
 
-    localStorage.setItem('accessToken', refreshedTokens.access);
-    window.dispatchEvent(new Event('auth-change'));
+    setAccessToken(refreshedTokens.access);
+    notifyAuthChange();
 
     return requestCallback(refreshedTokens.access);
   }

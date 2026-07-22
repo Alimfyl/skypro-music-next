@@ -1,5 +1,9 @@
 'use client';
 
+import {
+  getAccessToken,
+  subscribeToAuth,
+} from '@/utils/authStorage';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { getFavoriteTracks } from '@/api/client';
@@ -7,19 +11,7 @@ import { mapApiTracksToTracks } from '@/api/mappers';
 import { MainLayout } from '@/components/MainLayout/MainLayout';
 import type { TrackType } from '@/data/tracks';
 
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener('auth-change', callback);
 
-  return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener('auth-change', callback);
-  };
-}
-
-function getAccessTokenSnapshot(): string | null {
-  return localStorage.getItem('accessToken') || '';
-}
 
 function getServerSnapshot(): string | null {
   return null;
@@ -30,7 +22,7 @@ export function FavoritesContent() {
 
   const accessToken = useSyncExternalStore(
     subscribeToAuth,
-    getAccessTokenSnapshot,
+    getAccessToken,
     getServerSnapshot,
   );
 

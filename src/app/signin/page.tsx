@@ -1,5 +1,6 @@
 'use client';
 
+import { saveAuthData } from '@/utils/authStorage';
 import { FormEvent, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,11 +33,12 @@ export default function SigninPage() {
         password,
       });
 
-      localStorage.setItem('accessToken', tokens.access);
-      localStorage.setItem('refreshToken', tokens.refresh);
-      localStorage.setItem('userName', user.username);
-      localStorage.setItem('userId', user._id.toString());
-
+      saveAuthData({
+        accessToken: tokens.access,
+        refreshToken: tokens.refresh,
+        userName: user.username,
+        userId: user._id.toString(),
+      });
       router.push('/');
     } catch (error) {
       if (error instanceof Error) {

@@ -1,5 +1,12 @@
 'use client';
 
+import { updateTrackLikeState } from '@/utils/trackLikes';
+import {
+  getAccessToken,
+  getServerSnapshot,
+  getUserId,
+  subscribeToAuth,
+} from '@/utils/authStorage';
 import cn from 'classnames';
 import { ChangeEvent, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
@@ -35,23 +42,6 @@ function formatTime(seconds: number) {
   return `${minutes}:${secondsLeft}`;
 }
 
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener('auth-change', callback);
-
-  return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener('auth-change', callback);
-  };
-}
-
-function getUserIdSnapshot() {
-  return localStorage.getItem('userId') || '';
-}
-
-function getServerUserIdSnapshot() {
-  return '';
-}
 
 export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -63,8 +53,8 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
 
   const userId = useSyncExternalStore(
     subscribeToAuth,
-    getUserIdSnapshot,
-    getServerUserIdSnapshot,
+    getUserId,
+    getServerSnapshot,
   );
   const numericUserId = Number(userId);
 
@@ -222,7 +212,7 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
       return;
     }
 
-    if (!localStorage.getItem('accessToken') || !userId) {
+    if (!getAccessToken() || !userId) {
       onError('Чтобы поставить лайк, нужно войти в аккаунт');
       return;
     }
@@ -234,16 +224,11 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
         await removeTrackFromFavorite(currentTrack.id);
       }
 
-      const likedUserIds = shouldLike
-        ? Array.from(new Set([...currentTrack.likedUserIds, numericUserId]))
-        : currentTrack.likedUserIds.filter(
-          (likedUserId) => likedUserId !== numericUserId,
-        );
-      const updatedTrack = {
-        ...currentTrack,
-        likedUserIds,
-        likesCount: likedUserIds.length,
-      };
+      const updatedTrack = updateTrackLikeState(
+        currentTrack,
+        numericUserId,
+        shouldLike,
+      );
 
       dispatch(setCurrentTrack(updatedTrack));
       onTrackChange(updatedTrack);
