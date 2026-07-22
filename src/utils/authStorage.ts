@@ -33,6 +33,7 @@ export function getUserId() {
 export function getServerSnapshot() {
   return '';
 }
+
 export function setAccessToken(accessToken: string) {
   localStorage.setItem('accessToken', accessToken);
 }

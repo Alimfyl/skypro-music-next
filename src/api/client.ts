@@ -16,6 +16,7 @@ import {
   getAccessToken,
   getRefreshToken,
   notifyAuthChange,
+  setAccessToken,
 } from '@/utils/authStorage';
 
 const API_URL = 'https://webdev-music-003b5b991590.herokuapp.com';
@@ -83,7 +84,7 @@ export async function withReAuth<T>(
       refresh: refreshToken,
     });
 
-    localStorage.setItem('accessToken', refreshedTokens.access);
+    setAccessToken(refreshedTokens.access);
     notifyAuthChange();
 
     return requestCallback(refreshedTokens.access);
