@@ -4,25 +4,14 @@ import { useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  clearAuthStorage,
+  getServerSnapshot,
+  getUserName,
+  notifyAuthChange,
+  subscribeToAuth,
+} from '@/utils/authStorage';
 import styles from './Sidebar.module.css';
-
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener('auth-change', callback);
-
-  return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener('auth-change', callback);
-  };
-}
-
-function getUserNameSnapshot() {
-  return localStorage.getItem('userName') || '';
-}
-
-function getServerSnapshot() {
-  return '';
-}
 
 export function Sidebar() {
   const router = useRouter();
@@ -30,18 +19,15 @@ export function Sidebar() {
 
   const userName = useSyncExternalStore(
     subscribeToAuth,
-    getUserNameSnapshot,
+    getUserName,
     getServerSnapshot,
   );
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
+    clearAuthStorage();
 
     if (pathname !== '/favorites') {
-      window.dispatchEvent(new Event('auth-change'));
+      notifyAuthChange();
     }
 
     router.replace('/');
