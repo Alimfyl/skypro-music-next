@@ -31,9 +31,6 @@ const playerSlice = createSlice({
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
     },
-    togglePlaying: (state) => {
-      state.isPlaying = !state.isPlaying;
-    },
     toggleLooping: (state) => {
       state.isLooping = !state.isLooping;
     },
@@ -47,7 +44,6 @@ export const {
   setCurrentTrack,
   setCurrentPlaylist,
   setIsPlaying,
-  togglePlaying,
   toggleLooping,
   toggleShuffle,
 } = playerSlice.actions;
