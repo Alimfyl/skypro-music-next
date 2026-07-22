@@ -1,5 +1,6 @@
 'use client';
 
+import { updateTrackLikeState } from '@/utils/trackLikes';
 import {
   getAccessToken,
   getServerSnapshot,
@@ -83,15 +84,11 @@ export function Track({
         await addTrackToFavorite(track.id);
       }
 
-      const currentUserId = Number(userId);
-      const likedUserIds = isLiked
-        ? track.likedUserIds.filter((likedUserId) => likedUserId !== currentUserId)
-        : [...track.likedUserIds, currentUserId];
-      const updatedTrack = {
-        ...track,
-        likedUserIds,
-        likesCount: likedUserIds.length,
-      };
+      const updatedTrack = updateTrackLikeState(
+        track,
+        Number(userId),
+        !isLiked,
+      );
 
       if (isCurrentTrack) {
         dispatch(setCurrentTrack(updatedTrack));

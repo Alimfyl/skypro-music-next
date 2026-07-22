@@ -1,5 +1,6 @@
 'use client';
 
+import { updateTrackLikeState } from '@/utils/trackLikes';
 import {
   getAccessToken,
   getServerSnapshot,
@@ -223,16 +224,11 @@ export function PlayerBar({ onTrackChange, onError }: PlayerBarProps) {
         await removeTrackFromFavorite(currentTrack.id);
       }
 
-      const likedUserIds = shouldLike
-        ? Array.from(new Set([...currentTrack.likedUserIds, numericUserId]))
-        : currentTrack.likedUserIds.filter(
-          (likedUserId) => likedUserId !== numericUserId,
-        );
-      const updatedTrack = {
-        ...currentTrack,
-        likedUserIds,
-        likesCount: likedUserIds.length,
-      };
+      const updatedTrack = updateTrackLikeState(
+        currentTrack,
+        numericUserId,
+        shouldLike,
+      );
 
       dispatch(setCurrentTrack(updatedTrack));
       onTrackChange(updatedTrack);
