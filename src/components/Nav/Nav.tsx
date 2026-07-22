@@ -5,24 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './Nav.module.css';
+import {
+  clearAuthStorage,
+  getAccessToken,
+  getServerSnapshot,
+  notifyAuthChange,
+  subscribeToAuth,
+} from '@/utils/authStorage';
 
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener('auth-change', callback);
-
-  return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener('auth-change', callback);
-  };
-}
-
-function getAuthSnapshot() {
-  return localStorage.getItem('accessToken') || '';
-}
-
-function getServerSnapshot() {
-  return '';
-}
 
 export function Nav() {
   const router = useRouter();
@@ -31,20 +21,17 @@ export function Nav() {
 
   const accessToken = useSyncExternalStore(
     subscribeToAuth,
-    getAuthSnapshot,
+    getAccessToken,
     getServerSnapshot,
   );
 
   const isAuthorized = Boolean(accessToken);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
+    clearAuthStorage();
 
     if (pathname !== '/favorites') {
-      window.dispatchEvent(new Event('auth-change'));
+      notifyAuthChange();
     }
 
     router.replace('/');
