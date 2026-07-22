@@ -1,5 +1,6 @@
 'use client';
 
+import { getUserId } from '@/utils/authStorage';
 import { useCallback, useMemo, useState } from 'react';
 import { Nav } from '@/components/Nav/Nav';
 import { Search } from '@/components/Search/Search';
@@ -15,13 +16,6 @@ import {
 } from '@/utils/trackFilters';
 import styles from './MainLayout.module.css';
 
-function getCurrentUserId() {
-  if (typeof window === 'undefined') {
-    return 0;
-  }
-
-  return Number(localStorage.getItem('userId'));
-}
 
 type MainLayoutProps = {
   title: string;
@@ -52,7 +46,7 @@ export function MainLayout({
   const handleTrackChange = useCallback(
     (updatedTrack: TrackType) => {
       setCurrentTracks((prevTracks) => {
-        const userId = getCurrentUserId();
+        const userId = Number(getUserId());
         const isLikedByCurrentUser = updatedTrack.likedUserIds.includes(userId);
 
         if (isFavoritesPage && !isLikedByCurrentUser) {
