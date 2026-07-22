@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  getAccessToken,
+  getServerSnapshot,
+  getUserId,
+  subscribeToAuth,
+} from '@/utils/authStorage';
 import cn from 'classnames';
 import { useSyncExternalStore, type MouseEvent } from 'react';
 import Link from 'next/link';
@@ -23,24 +29,6 @@ type TrackProps = {
   onError: (message: string) => void;
 };
 
-function subscribeToAuth(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener('auth-change', callback);
-
-  return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener('auth-change', callback);
-  };
-}
-
-function getUserIdSnapshot() {
-  return localStorage.getItem('userId') || '';
-}
-
-function getServerUserIdSnapshot() {
-  return '';
-}
-
 export function Track({
   track,
   playlist,
@@ -53,8 +41,8 @@ export function Track({
 
   const userId = useSyncExternalStore(
     subscribeToAuth,
-    getUserIdSnapshot,
-    getServerUserIdSnapshot,
+    getUserId,
+    getServerSnapshot,
   );
   const isLiked = userId
     ? track.likedUserIds.includes(Number(userId))
@@ -83,7 +71,7 @@ export function Track({
     event.stopPropagation();
     event.preventDefault();
 
-    if (!localStorage.getItem('accessToken')) {
+    if (!getAccessToken()) {
       onError('Чтобы поставить лайк, нужно войти в аккаунт');
       return;
     }
