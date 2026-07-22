@@ -33,6 +33,26 @@ export function getUserId() {
 export function getServerSnapshot() {
   return '';
 }
+export function setAccessToken(accessToken: string) {
+  localStorage.setItem('accessToken', accessToken);
+}
+
+export function saveAuthData({
+  accessToken,
+  refreshToken,
+  userName,
+  userId,
+}: {
+  accessToken: string;
+  refreshToken: string;
+  userName: string;
+  userId: string;
+}) {
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+  localStorage.setItem('userName', userName);
+  localStorage.setItem('userId', userId);
+}
 
 export function clearAuthStorage() {
   localStorage.removeItem('accessToken');
